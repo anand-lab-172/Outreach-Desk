@@ -258,19 +258,25 @@
 
   <div class="od-panel">
     <h3>Resume</h3>
-    <div id="od-resume-empty">
-      <label class="od-label">Upload your resume — it'll be saved here so it's one click to grab each morning</label>
-      <div class="od-row">
-        <input type="file" id="od-resume-input" accept=".pdf,.doc,.docx" style="flex:1;">
-      </div>
+
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+
+        <button
+            id="od-resume-status"
+            class="od-btn ghost"
+            disabled>
+            Checking Resume...
+        </button>
+
+        <button
+            id="od-open-resume"
+            class="od-btn"
+            style="display:none;">
+            Open Resume
+        </button>
+
     </div>
-    <div id="od-resume-filled" style="display:none; align-items:center; gap:10px;">
-      <span class="od-badge sent" id="od-resume-name">resume.pdf</span>
-      <button class="od-btn small" id="od-resume-download">Download</button>
-      <button class="od-btn ghost danger small" id="od-resume-remove">Remove</button>
-    </div>
-  </div>
-</div></div>
+</div>
 
 <script>
 // --- localStorage polyfill, standing in for Claude's artifact window.storage API ---
