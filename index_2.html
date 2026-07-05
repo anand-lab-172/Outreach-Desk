@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Outreach Desk — Anandaram Ganapathi</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #12171c;
+    --surface: #1a2128;
+    --surface-2: #212a32;
+    --border: #2a343d;
+    --text: #e7edf1;
+    --muted: #8b9aa6;
+    --accent: #5eead4;
+    --accent-dim: #2f5b55;
+    --sent: #34d399;
+    --pending: #f2b84b;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { background: var(--bg); margin: 0; }
+
+  #od-bg {
+    background: var(--bg);
+    min-height: 100vh;
+    width: 100%;
+  }
+
+  #od-root {
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    padding: 32px 48px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .od-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .od-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .od-title span { color: var(--accent); }
+  .od-sub {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 4px;
+  }
+
+  .od-stats {
+    display: flex;
+    gap: 20px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .od-stat { text-align: right; }
+  .od-stat .n { font-size: 20px; font-weight: 600; color: var(--accent); display:block; }
+  .od-stat .l { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+  .od-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 16px;
+  }
+
+  .od-split-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+    align-items: stretch;
+  }
+  .od-split-item {
+    margin-bottom: 0;
+    min-width: 280px;
+    display: flex;
+    flex-direction: column;
+  }
+  @media (max-width: 720px) {
+    .od-split-row { flex-direction: column; }
+  }
+
+  .od-panel h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin: 0 0 12px 0;
+  }
+
+  .od-row { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+  .od-row input, .od-row textarea {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+  }
+  .od-row input { flex: 1; min-width: 120px; }
+  .od-row textarea { width: 100%; min-height: 64px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+
+  input:focus, textarea:focus, button:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  .od-btn {
+    background: var(--accent);
+    color: #0b1414;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+  }
+  .od-btn:hover { opacity: 0.88; }
+  .od-btn.secondary {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent-dim);
+  }
+  .od-btn.ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  .od-btn.small { padding: 5px 10px; font-size: 12px; }
+  .od-btn.danger { color: #f87171; border-color: #4a2a2a; }
+
+  .od-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .od-table th {
+    text-align: left;
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .od-table td { padding: 9px 6px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .od-table tr:last-child td { border-bottom: none; }
+  .od-name { font-weight: 600; }
+  .od-email { color: var(--muted); font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+
+  .od-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .od-badge.pending { background: rgba(242,184,75,0.12); color: var(--pending); }
+  .od-badge.sent { background: rgba(52,211,153,0.12); color: var(--sent); }
+
+  .od-actions { display: flex; gap: 6px; justify-content: flex-end; }
+
+  .od-empty { color: var(--muted); font-size: 13px; padding: 16px 0; text-align: center; }
+
+  .od-note {
+    font-size: 12px;
+    color: var(--pending);
+    background: rgba(242,184,75,0.08);
+    border: 1px solid rgba(242,184,75,0.25);
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 16px;
+  }
+
+  .od-provider-toggle button.active { background: var(--accent); color: #0b1414; border-color: var(--accent); }
+
+  label.od-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px; }
+</style>
+</head>
+<body>
+
+<div id="od-bg"><div id="od-root">
+  <div class="od-header">
+    <div>
+      <div class="od-title">Outreach <span>Desk</span></div>
+      <div class="od-sub">Anandaram Ganapathi — Data Scientist outreach tracker</div>
+    </div>
+    <div class="od-stats">
+      <div class="od-stat"><span class="n" id="od-stat-total">0</span><span class="l">Contacts</span></div>
+      <div class="od-stat"><span class="n" id="od-stat-pending">0</span><span class="l">Pending</span></div>
+      <div class="od-stat"><span class="n" id="od-stat-sent">0</span><span class="l">Sent</span></div>
+      <div class="od-stat"><span class="n" id="od-stat-streak">0🔥</span><span class="l">Day streak</span></div>
+    </div>
+  </div>
+
+  <div class="od-panel">
+    <h3>Message template</h3>
+    <div class="od-row">
+      <input type="text" id="od-role" placeholder="Role you're applying for (e.g. ML Engineer)" style="max-width: 320px;">
+    </div>
+    <label class="od-label">Use <code>{{role}}</code> in the template to auto-fill the role above, and <code>{{name}}</code> for the contact's first name</label>
+    <div class="od-row">
+      <input type="text" id="od-subject" placeholder="Subject" style="flex: 1;">
+    </div>
+    <div class="od-row">
+      <textarea id="od-body" style="min-height: 180px;"></textarea>
+    </div>
+    <div style="display:flex; justify-content: space-between; align-items:center; margin-top: 6px;">
+      <div class="od-provider-toggle">
+        <button class="od-btn ghost" id="od-provider-gmail">Gmail</button>
+        <button class="od-btn ghost" id="od-provider-default">Default mail app</button>
+      </div>
+      <button class="od-btn secondary small" id="od-save-template">Save template</button>
+    </div>
+  </div>
+
+  <div class="od-split-row">
+    <div class="od-panel od-split-item" style="flex: 1;">
+      <h3>Add contacts</h3>
+      <div class="od-row">
+        <input type="text" id="od-name" placeholder="Name">
+        <input type="email" id="od-email" placeholder="Email">
+        <input type="text" id="od-company" placeholder="Company (optional)">
+        <button class="od-btn" id="od-add-one">Add</button>
+      </div>
+      <label class="od-label" style="margin-top:8px;">Or paste a list — one per line, "Name, Email, Company"</label>
+      <div class="od-row">
+        <textarea id="od-bulk" placeholder="Jane Doe, jane@company.com, Company Inc"></textarea>
+      </div>
+      <button class="od-btn secondary small" id="od-add-bulk">Import list</button>
+    </div>
+
+    <div class="od-panel od-split-item" style="flex: 1.4; overflow-x: auto;">
+      <h3>Contacts</h3>
+      <table class="od-table" id="od-table">
+        <thead>
+          <tr><th>Name</th><th>Email</th><th>Company</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody id="od-tbody"></tbody>
+      </table>
+      <div class="od-empty" id="od-empty" style="display:none;">No contacts yet — add one above or paste a list.</div>
+    </div>
+  </div>
+
+  <div class="od-panel">
+    <h3>Resume</h3>
+    <div id="od-resume-empty">
+      <label class="od-label">Upload your resume — it'll be saved here so it's one click to grab each morning</label>
+      <div class="od-row">
+        <input type="file" id="od-resume-input" accept=".pdf,.doc,.docx" style="flex:1;">
+      </div>
+    </div>
+    <div id="od-resume-filled" style="display:none; align-items:center; gap:10px;">
+      <span class="od-badge sent" id="od-resume-name">resume.pdf</span>
+      <button class="od-btn small" id="od-resume-download">Download</button>
+      <button class="od-btn ghost danger small" id="od-resume-remove">Remove</button>
+    </div>
+  </div>
+</div></div>
+
+<script>
+// --- localStorage polyfill, standing in for Claude's artifact window.storage API ---
+window.storage = {
+  get: async (key) => {
+    const v = localStorage.getItem('od_' + key);
+    return v === null ? null : { key, value: v, shared: false };
+  },
+  set: async (key, value) => {
+    localStorage.setItem('od_' + key, value);
+    return { key, value, shared: false };
+  },
+  delete: async (key) => {
+    localStorage.removeItem('od_' + key);
+    return { key, deleted: true, shared: false };
+  }
+};
+
+(function() {
+  const DEFAULT_ROLE = "Data Scientist";
+  const DEFAULT_SUBJECT = "Applying for {{role}} Position — Immediate Joiner";
+  const DEFAULT_BODY = "Hi {{name}},\n\nI hope you're doing well.\n\nI recently came across the {{role}} opening and was excited by the opportunity. I have 5+ years of experience in Data Science, Machine Learning, AI/GenAI, and predictive analytics, with a proven track record of developing and deploying data-driven solutions across multiple industries.\n\nI am currently exploring new opportunities and am available to JOIN IMMEDIATELY. I have attached my updated resume for your review and would appreciate the opportunity to discuss how my experience aligns with your team's requirements.\n\nThank you for your time and consideration. I look forward to hearing from you.\n\nBest regards,\nAnandaram Ganapathi\n+91 - 9791889031";
+
+  let contacts = [];
+  let provider = 'gmail';
+  let streak = { count: 0, lastDate: null };
+
+  const $ = (id) => document.getElementById(id);
+
+  async function loadAll() {
+    try {
+      const c = await window.storage.get('contacts');
+      contacts = c ? JSON.parse(c.value) : [];
+    } catch (e) { contacts = []; }
+
+    try {
+      const t = await window.storage.get('template');
+      const tpl = t ? JSON.parse(t.value) : null;
+      $('od-subject').value = tpl ? tpl.subject : DEFAULT_SUBJECT;
+      $('od-body').value = tpl ? tpl.body : DEFAULT_BODY;
+    } catch (e) {
+      $('od-subject').value = DEFAULT_SUBJECT;
+      $('od-body').value = DEFAULT_BODY;
+    }
+
+    try {
+      const rl = await window.storage.get('role');
+      $('od-role').value = rl ? rl.value : DEFAULT_ROLE;
+    } catch (e) { $('od-role').value = DEFAULT_ROLE; }
+
+    try {
+      const p = await window.storage.get('provider');
+      provider = p ? p.value : 'gmail';
+    } catch (e) { provider = 'gmail'; }
+
+    await loadResume();
+    await loadStreak();
+    render();
+  }
+
+  async function loadResume() {
+    try {
+      const r = await window.storage.get('resume');
+      const data = r ? JSON.parse(r.value) : null;
+      if (data) {
+        $('od-resume-empty').style.display = 'none';
+        $('od-resume-filled').style.display = 'flex';
+        $('od-resume-name').textContent = data.filename;
+      } else {
+        $('od-resume-empty').style.display = 'block';
+        $('od-resume-filled').style.display = 'none';
+      }
+    } catch (e) {
+      $('od-resume-empty').style.display = 'block';
+      $('od-resume-filled').style.display = 'none';
+    }
+  }
+
+  $('od-resume-input').onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        await window.storage.set('resume', JSON.stringify({ filename: file.name, dataUrl: reader.result }));
+        await loadResume();
+      } catch (err) { console.error('resume save failed', err); }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  $('od-resume-download').onclick = async () => {
+    try {
+      const r = await window.storage.get('resume');
+      const data = r ? JSON.parse(r.value) : null;
+      if (!data) return;
+      const a = document.createElement('a');
+      a.href = data.dataUrl;
+      a.download = data.filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch (e) { console.error('resume download failed', e); }
+  };
+
+  $('od-resume-remove').onclick = async () => {
+    try { await window.storage.delete('resume'); } catch (e) {}
+    await loadResume();
+  };
+
+  async function saveContacts() {
+    try { await window.storage.set('contacts', JSON.stringify(contacts)); }
+    catch (e) { console.error('save contacts failed', e); }
+  }
+
+  async function saveTemplate() {
+    try {
+      await window.storage.set('template', JSON.stringify({ subject: $('od-subject').value, body: $('od-body').value }));
+      await window.storage.set('role', $('od-role').value.trim());
+    } catch (e) { console.error('save template failed', e); }
+  }
+
+  async function loadStreak() {
+    try {
+      const s = await window.storage.get('streak');
+      streak = s ? JSON.parse(s.value) : { count: 0, lastDate: null };
+    } catch (e) { streak = { count: 0, lastDate: null }; }
+    renderStreak();
+  }
+
+  function todayStr() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  async function bumpStreak() {
+    const today = todayStr();
+    if (streak.lastDate === today) return; // already counted today
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    streak.count = (streak.lastDate === yesterday) ? streak.count + 1 : 1;
+    streak.lastDate = today;
+    try { await window.storage.set('streak', JSON.stringify(streak)); } catch (e) {}
+    renderStreak();
+  }
+
+  function renderStreak() {
+    $('od-stat-streak').textContent = (streak.count || 0) + '🔥';
+  }
+
+  async function saveProvider() {
+    try { await window.storage.set('provider', provider); }
+    catch (e) { console.error('save provider failed', e); }
+  }
+
+  function updateProviderButtons() {
+    $('od-provider-gmail').classList.toggle('active', provider === 'gmail');
+    $('od-provider-default').classList.toggle('active', provider === 'default');
+  }
+
+  function firstName(name) {
+    if (!name) return 'there';
+    return name.trim().split(' ')[0];
+  }
+
+  function openDraft(contact) {
+    const role = $('od-role').value.trim() || DEFAULT_ROLE;
+    const subject = $('od-subject').value.split('{{role}}').join(role);
+    const body = $('od-body').value.split('{{role}}').join(role).split('{{name}}').join(firstName(contact.name));
+    let url;
+    if (provider === 'gmail') {
+      url = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(contact.email) +
+            '&su=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+    } else {
+      url = 'mailto:' + encodeURIComponent(contact.email) +
+            '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+    }
+    window.open(url, '_blank');
+  }
+
+  function render() {
+    const tbody = $('od-tbody');
+    tbody.innerHTML = '';
+    $('od-empty').style.display = contacts.length ? 'none' : 'block';
+
+    contacts.forEach((c, i) => {
+      const tr = document.createElement('tr');
+
+      const tdName = document.createElement('td');
+      tdName.className = 'od-name';
+      tdName.textContent = c.name || '(no name)';
+      tr.appendChild(tdName);
+
+      const tdEmail = document.createElement('td');
+      tdEmail.className = 'od-email';
+      tdEmail.textContent = c.email;
+      tr.appendChild(tdEmail);
+
+      const tdCompany = document.createElement('td');
+      tdCompany.textContent = c.company || '—';
+      tr.appendChild(tdCompany);
+
+      const tdStatus = document.createElement('td');
+      const badge = document.createElement('span');
+      badge.className = 'od-badge ' + (c.sent ? 'sent' : 'pending');
+      badge.textContent = c.sent ? 'Sent' : 'Pending';
+      tdStatus.appendChild(badge);
+      tr.appendChild(tdStatus);
+
+      const tdActions = document.createElement('td');
+      const actions = document.createElement('div');
+      actions.className = 'od-actions';
+
+      const openBtn = document.createElement('button');
+      openBtn.className = 'od-btn small';
+      openBtn.textContent = 'Open draft';
+      openBtn.onclick = () => { openDraft(c); };
+      actions.appendChild(openBtn);
+
+      const toggleBtn = document.createElement('button');
+      toggleBtn.className = 'od-btn ghost small';
+      toggleBtn.textContent = c.sent ? 'Mark pending' : 'Mark sent';
+      toggleBtn.onclick = () => {
+        contacts[i].sent = !contacts[i].sent;
+        saveContacts(); render();
+        if (contacts[i].sent) bumpStreak();
+      };
+      actions.appendChild(toggleBtn);
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'od-btn ghost danger small';
+      delBtn.textContent = 'Remove';
+      delBtn.onclick = () => { contacts.splice(i, 1); saveContacts(); render(); };
+      actions.appendChild(delBtn);
+
+      tdActions.appendChild(actions);
+      tr.appendChild(tdActions);
+
+      tbody.appendChild(tr);
+    });
+
+    $('od-stat-total').textContent = contacts.length;
+    $('od-stat-pending').textContent = contacts.filter(c => !c.sent).length;
+    $('od-stat-sent').textContent = contacts.filter(c => c.sent).length;
+
+    updateProviderButtons();
+  }
+
+  $('od-add-one').onclick = () => {
+    const name = $('od-name').value.trim();
+    const email = $('od-email').value.trim();
+    const company = $('od-company').value.trim();
+    if (!email) return;
+    contacts.push({ name, email, company, sent: false });
+    $('od-name').value = ''; $('od-email').value = ''; $('od-company').value = '';
+    saveContacts(); render();
+  };
+
+  $('od-add-bulk').onclick = () => {
+    const lines = $('od-bulk').value.split('\n').map(l => l.trim()).filter(Boolean);
+    lines.forEach(line => {
+      const parts = line.split(',').map(p => p.trim());
+      const [name, email, company] = parts;
+      if (email && email.includes('@')) {
+        contacts.push({ name: name || '', email, company: company || '', sent: false });
+      }
+    });
+    $('od-bulk').value = '';
+    saveContacts(); render();
+  };
+
+
+  $('od-save-template').onclick = () => { saveTemplate(); };
+
+  $('od-provider-gmail').onclick = () => { provider = 'gmail'; saveProvider(); updateProviderButtons(); };
+  $('od-provider-default').onclick = () => { provider = 'default'; saveProvider(); updateProviderButtons(); };
+
+  loadAll();
+})();
+</script>
+</body>
+</html>
