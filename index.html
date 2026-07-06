@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Outreach Desk — Anandaram Ganapathi</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2312171c'/%3E%3Ctext x='32' y='43' font-family='Arial, sans-serif' font-size='26' font-weight='700' fill='%235eead4' text-anchor='middle'%3EAG%3C/text%3E%3C/svg%3E">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap');
 
@@ -132,6 +133,7 @@
     font-family: 'Inter', sans-serif;
   }
   .od-btn:hover { opacity: 0.88; }
+  .od-btn:disabled { opacity: 0.5; cursor: default; }
   .od-btn.secondary {
     background: transparent;
     color: var(--accent);
@@ -207,6 +209,10 @@
     </div>
   </div>
 
+  <div class="od-note">
+    Each "Open draft" opens a pre-filled email in Gmail (or your mail app). Browsers won't let a page attach files or send mail on its own, so — attach your resume once it opens, then hit send yourself. Marking a row "Sent" is manual too.
+  </div>
+
   <div class="od-panel">
     <h3>Message template</h3>
     <div class="od-row">
@@ -258,25 +264,12 @@
 
   <div class="od-panel">
     <h3>Resume</h3>
-
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-
-        <button
-            id="od-resume-status"
-            class="od-btn ghost"
-            disabled>
-            Checking Resume...
-        </button>
-
-        <button
-            id="od-open-resume"
-            class="od-btn"
-            style="display:none;">
-            Open Resume
-        </button>
-
+      <button id="od-resume-status" class="od-btn ghost" disabled>Checking resume...</button>
+      <button id="od-open-resume" class="od-btn" style="display:none;">Open resume</button>
     </div>
-</div>
+  </div>
+</div></div>
 
 <script>
 // --- localStorage polyfill, standing in for Claude's artifact window.storage API ---
@@ -299,6 +292,9 @@ window.storage = {
   const DEFAULT_ROLE = "Data Scientist";
   const DEFAULT_SUBJECT = "Applying for {{role}} Position — Immediate Joiner";
   const DEFAULT_BODY = "Hi {{name}},\n\nI hope you're doing well.\n\nI recently came across the {{role}} opening and was excited by the opportunity. I have 5+ years of experience in Data Science, Machine Learning, AI/GenAI, and predictive analytics, with a proven track record of developing and deploying data-driven solutions across multiple industries.\n\nI am currently exploring new opportunities and am available to JOIN IMMEDIATELY. I have attached my updated resume for your review and would appreciate the opportunity to discuss how my experience aligns with your team's requirements.\n\nThank you for your time and consideration. I look forward to hearing from you.\n\nBest regards,\nAnandaram Ganapathi\n+91 - 9791889031";
+
+  // Names checked, in order, in the same folder as this page — first one found wins.
+  const RESUME_CANDIDATES = ['resume.pdf', 'Resume.pdf', 'Anandaram_Ganapathi.pdf'];
 
   let contacts = [];
   let provider = 'gmail';
@@ -332,60 +328,33 @@ window.storage = {
       provider = p ? p.value : 'gmail';
     } catch (e) { provider = 'gmail'; }
 
-    await loadResume();
+    checkResume();
     await loadStreak();
     render();
   }
 
-  async function loadResume() {
-    try {
-      const r = await window.storage.get('resume');
-      const data = r ? JSON.parse(r.value) : null;
-      if (data) {
-        $('od-resume-empty').style.display = 'none';
-        $('od-resume-filled').style.display = 'flex';
-        $('od-resume-name').textContent = data.filename;
-      } else {
-        $('od-resume-empty').style.display = 'block';
-        $('od-resume-filled').style.display = 'none';
-      }
-    } catch (e) {
-      $('od-resume-empty').style.display = 'block';
-      $('od-resume-filled').style.display = 'none';
-    }
-  }
+  // Auto-detects a resume file sitting next to this page in the repo (e.g. resume.pdf)
+  // and turns "Checking resume..." into a working "Open resume" button once found.
+  async function checkResume() {
+    const statusBtn = $('od-resume-status');
+    const openBtn = $('od-open-resume');
 
-  $('od-resume-input').onchange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async () => {
+    for (const filename of RESUME_CANDIDATES) {
       try {
-        await window.storage.set('resume', JSON.stringify({ filename: file.name, dataUrl: reader.result }));
-        await loadResume();
-      } catch (err) { console.error('resume save failed', err); }
-    };
-    reader.readAsDataURL(file);
-  };
+        const res = await fetch(filename, { method: 'HEAD', cache: 'no-store' });
+        if (res.ok) {
+          statusBtn.style.display = 'none';
+          openBtn.style.display = 'inline-block';
+          openBtn.textContent = 'Open resume';
+          openBtn.onclick = () => window.open(filename, '_blank');
+          return;
+        }
+      } catch (e) { /* try next candidate */ }
+    }
 
-  $('od-resume-download').onclick = async () => {
-    try {
-      const r = await window.storage.get('resume');
-      const data = r ? JSON.parse(r.value) : null;
-      if (!data) return;
-      const a = document.createElement('a');
-      a.href = data.dataUrl;
-      a.download = data.filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } catch (e) { console.error('resume download failed', e); }
-  };
-
-  $('od-resume-remove').onclick = async () => {
-    try { await window.storage.delete('resume'); } catch (e) {}
-    await loadResume();
-  };
+    statusBtn.textContent = 'No resume found — add resume.pdf next to index.html';
+    statusBtn.disabled = true;
+  }
 
   async function saveContacts() {
     try { await window.storage.set('contacts', JSON.stringify(contacts)); }
@@ -545,7 +514,6 @@ window.storage = {
     $('od-bulk').value = '';
     saveContacts(); render();
   };
-
 
   $('od-save-template').onclick = () => { saveTemplate(); };
 
