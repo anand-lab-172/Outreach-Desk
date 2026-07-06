@@ -214,6 +214,20 @@
   </div>
 
   <div class="od-panel">
+    <h3>Send from</h3>
+    <label class="od-label">Gmail can't be told an account by email in the URL — only by "slot" (0, 1, 2...), based on the order you're signed in on this browser. Pick the account below; if the wrong inbox opens, nudge its slot number until it's right — it'll remember it after that.</label>
+    <div class="od-row" style="align-items:center;">
+      <select id="od-account-select" style="background: var(--surface-2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 8px 10px; font-size: 13px; flex: 1; min-width: 220px;"></select>
+      <label class="od-label" style="margin:0;">Slot</label>
+      <input type="number" id="od-account-slot" min="0" max="9" style="width: 70px; flex: none;">
+    </div>
+    <div class="od-row" style="margin-top: 4px;">
+      <input type="email" id="od-account-new" placeholder="Add another account">
+      <button class="od-btn secondary small" id="od-account-add">Add</button>
+    </div>
+  </div>
+
+  <div class="od-panel">
     <h3>Message template</h3>
     <div class="od-row">
       <input type="text" id="od-role" placeholder="Role you're applying for (e.g. ML Engineer)" style="max-width: 320px;">
@@ -296,9 +310,16 @@ window.storage = {
   // Names checked, in order, in the same folder as this page — first one found wins.
   const RESUME_CANDIDATES = ['resume.pdf', 'Resume.pdf', 'Anandaram_Ganapathi.pdf'];
 
+  const DEFAULT_ACCOUNTS = [
+    { label: "aero.172anand@gmail.com", slot: 0 },
+    { label: "anandaram.ganapathi@gmail.com", slot: 1 }
+  ];
+
   let contacts = [];
   let provider = 'gmail';
   let streak = { count: 0, lastDate: null };
+  let accounts = [];
+  let activeAccountIndex = 0;
 
   const $ = (id) => document.getElementById(id);
 
@@ -327,6 +348,18 @@ window.storage = {
       const p = await window.storage.get('provider');
       provider = p ? p.value : 'gmail';
     } catch (e) { provider = 'gmail'; }
+
+    try {
+      const acc = await window.storage.get('accounts');
+      accounts = acc ? JSON.parse(acc.value) : DEFAULT_ACCOUNTS.slice();
+    } catch (e) { accounts = DEFAULT_ACCOUNTS.slice(); }
+
+    try {
+      const idx = await window.storage.get('activeAccountIndex');
+      const n = idx ? parseInt(idx.value, 10) : 0;
+      activeAccountIndex = (n >= 0 && n < accounts.length) ? n : 0;
+    } catch (e) { activeAccountIndex = 0; }
+    renderAccountSelect();
 
     checkResume();
     await loadStreak();
@@ -399,6 +432,26 @@ window.storage = {
     catch (e) { console.error('save provider failed', e); }
   }
 
+  async function saveAccounts() {
+    try {
+      await window.storage.set('accounts', JSON.stringify(accounts));
+      await window.storage.set('activeAccountIndex', String(activeAccountIndex));
+    } catch (e) { console.error('save accounts failed', e); }
+  }
+
+  function renderAccountSelect() {
+    const select = $('od-account-select');
+    select.innerHTML = '';
+    accounts.forEach((acc, i) => {
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = acc.label;
+      select.appendChild(opt);
+    });
+    select.value = activeAccountIndex;
+    $('od-account-slot').value = accounts[activeAccountIndex] ? accounts[activeAccountIndex].slot : 0;
+  }
+
   function updateProviderButtons() {
     $('od-provider-gmail').classList.toggle('active', provider === 'gmail');
     $('od-provider-default').classList.toggle('active', provider === 'default');
@@ -415,7 +468,8 @@ window.storage = {
     const body = $('od-body').value.split('{{role}}').join(role).split('{{name}}').join(firstName(contact.name));
     let url;
     if (provider === 'gmail') {
-      url = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(contact.email) +
+      const slot = accounts[activeAccountIndex] ? accounts[activeAccountIndex].slot : 0;
+      url = 'https://mail.google.com/mail/u/' + slot + '/?view=cm&fs=1&to=' + encodeURIComponent(contact.email) +
             '&su=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
     } else {
       url = 'mailto:' + encodeURIComponent(contact.email) +
@@ -519,6 +573,26 @@ window.storage = {
 
   $('od-provider-gmail').onclick = () => { provider = 'gmail'; saveProvider(); updateProviderButtons(); };
   $('od-provider-default').onclick = () => { provider = 'default'; saveProvider(); updateProviderButtons(); };
+
+  $('od-account-select').onchange = (e) => {
+    activeAccountIndex = parseInt(e.target.value, 10);
+    saveAccounts(); renderAccountSelect();
+  };
+
+  $('od-account-slot').onchange = (e) => {
+    const v = parseInt(e.target.value, 10);
+    if (accounts[activeAccountIndex]) accounts[activeAccountIndex].slot = isNaN(v) ? 0 : v;
+    saveAccounts();
+  };
+
+  $('od-account-add').onclick = () => {
+    const email = $('od-account-new').value.trim();
+    if (!email || !email.includes('@') || accounts.some(a => a.label === email)) return;
+    accounts.push({ label: email, slot: accounts.length });
+    activeAccountIndex = accounts.length - 1;
+    $('od-account-new').value = '';
+    saveAccounts(); renderAccountSelect();
+  };
 
   loadAll();
 })();
